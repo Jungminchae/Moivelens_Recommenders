@@ -3,14 +3,17 @@ import numpy as np
 import os 
 from mlxtend.preprocessing import TransactionEncoder
 from scipy.sparse import csr_matrix
-
-
+from surprise.dataset import DatasetAutoFolds
+from surprise import Reader
 
 class Movielens_Dataloaders:
     def __init__(self):
         self.rating_data_path = os.path.join('data','rating_df.pkl')
         self.movie_data_path = os.path.join('data','movie_df.pkl')
         self.genre_data_path = os.path.join('data','genre_df.pkl')
+        # header없는 csv for surprise
+        # surprise는 DafaFrame 을 surprise로 convert 해야함
+        self.rating_csv_path = os.path.join('data', 'rating_df.csv')
 
     def data_for_apriori(self):
         # rating_data
@@ -104,3 +107,12 @@ class Movielens_Dataloaders:
 
         return inputs, rating_df
 
+    def data_for_SVD(self):
+        # to surprise data
+        reader = Reader(sep=',',rating_scale=(0.5,5))
+        data = DatasetAutoFolds(ratings_file=self.rating_csv_path, reader=reader)
+
+        # 전체 데이터를 학습 데이터로 생성
+        # 따로 validation을 위한 split은 하지 않음
+        trainset = data.build_full_trainset()
+        return trainset

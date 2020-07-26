@@ -6,6 +6,7 @@ from implicit.bpr import BayesianPersonalizedRanking
 import random 
 from IPython.display import display
 from dataloader import Movielens_Dataloaders
+from surprise import SVD
 
 class Weighted_popularity_recommender:
     def top_20_recommendation(self, df):
@@ -83,6 +84,20 @@ class Maxtrix_Factorization(Movielens_Dataloaders):
         # selected_movie와 유사한 영화 상위 10개 추천
         reco  = movie_embedding_df.dot(target).sort_values(ascending=False).iloc[:10]
         return display(reco)
+
+    def SVD_train(self, data, epochs, factors):
+        svd = SVD(n_epochs=epochs, n_factors=factors, random_state=123)
+        model = svd.fit(data)
+        return model
+    def SVD_recommendation(self, user_id):
+        # user_id 를 받아서 user의 과거 데이터 기반으로 추천
+        ratings = pd.read_pickle(self.rating_data_path)
+        movies = pd.read_pickle(self.movie_data_path)
+
+        has_user_rating = ratings[ratings['user_id']==user_id]['movie_id'].to_list()
+        movie_list = movies['id'].to_list()
+
+        
 
 
 
